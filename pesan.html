@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Daftar Resep Obat - Smartbox Medicine</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f4cccc;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ================= SIDEBAR ================= */
+    .sidebar {
+      position: fixed;
+      width: 250px;
+      background-color: #f5bcbc;
+      padding: 20px;
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+      z-index: 1000;
+      height: 100%;
+    }
+
+    .sidebar.active { display: flex; }
+
+    .close-btn {
+      font-size: 22px;
+      font-weight: bold;
+      cursor: pointer;
+      align-self: flex-end;
+    }
+
+    .username-box {
+      font-size: 18px;
+      font-weight: bold;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: black;
+      font-size: 16px;
+    }
+
+    .sidebar a:hover {
+      background: #d88c8c;
+      color: white;
+      padding-left: 10px;
+      border-radius: 6px;
+    }
+
+    .logout-btn {
+      margin-top: 25px;
+      background: #850808;
+      color: white;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+    }
+
+    /* ================= TOPBAR ================= */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: #f3b4b4;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .menu-icon { font-size: 30px; cursor: pointer; }
+
+    .search-bar { flex-grow: 1; margin: 0 20px; }
+
+    .search-bar input {
+      width: 100%;
+      padding: 9px 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    .profile-icon {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: black;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      font-size: 22px;
+    }
+
+    /* ================= TITLE ================= */
+    h2 {
+      text-align: center;
+      margin-top: 20px;
+      font-weight: 600;
+    }
+
+    /* ================= WRAPPER ================= */
+    .wrapper {
+      background: white;
+      width: 95%;
+      max-width: 900px;
+      margin: 15px auto;
+      padding: 20px;
+      border-radius: 10px;
+      border: 4px solid #e3b1b1;
+    }
+
+    /* ================= CARD PESAN ================= */
+    .order-card {
+      background: #f3d4d4;
+      width: 95%;
+      margin: 15px auto;
+      border-radius: 12px;
+      padding: 25px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .order-info h4 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .order-info p {
+      margin: 5px 0;
+      font-size: 14px;
+    }
+
+    .pesan-btn {
+      background: #e74c3c;
+      color: white;
+      padding: 10px 25px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    /* ============ FIX HP ============ */
+    @media (max-width: 768px) {
+      .order-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .order-info {
+        width: 100%;
+      }
+
+      .pesan-btn {
+        width: 100%;
+        margin-top: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="close-btn" onclick="toggleSidebar()">X</div>
+
+    <div class="username-box" id="sbName">
+      <i class="fa fa-user"></i> Haloo kak -
+    </div>
+
+    <a href="dashboard.html"><i class="fa fa-home"></i> Dashboard</a>
+    <a href="cekbox.html"><i class="fa fa-box-open"></i> Cek Box</a>
+    <a href="pesan.html"><i class="fa fa-comment-alt"></i> Pesan</a>
+
+    <button class="logout-btn" id="logoutBtn">Logout</button>
+  </div>
+
+  <!-- TOPBAR -->
+  <div class="top-bar">
+    <div class="menu-icon" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search nama atau NIK pasien...">
+    </div>
+
+    <div class="profile-icon" id="profileBtn">
+      <i class="fa fa-user"></i>
+    </div>
+  </div>
+
+  <h2>Daftar Pesanan Obat</h2>
+
+  <!-- CONTENT -->
+  <div class="wrapper" id="orderContainer">
+    <p style="text-align:center; color:gray;">Memuat data...</p>
+  </div>
+
+  <!-- ================= SCRIPT SIDEBAR ================= -->
+  <script>
+    function toggleSidebar() {
+      document.getElementById("sidebar").classList.toggle("active");
+    }
+
+    /* ===== FIX HALOO KAK (NAMA SAJA) ===== */
+    const activeUser = JSON.parse(localStorage.getItem("active_user"));
+    const nama = activeUser?.nama || activeUser?.username || "-";
+
+    document.getElementById("sbName").innerHTML =
+      `<i class="fa fa-user"></i> Haloo kak ${nama}`;
+
+    document.getElementById("logoutBtn").onclick = () => {
+      localStorage.removeItem("active_user");
+      window.location.href = "from_login.html";
+    };
+
+    /* ===== PROFIL ICON ===== */
+    document.getElementById("profileBtn").onclick = () => {
+      window.location.href = "profil.html";
+    };
+  </script>
+
+  <!-- ================= FIREBASE (ASLI) ================= -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAaNxT19AnB6Y_V2SwK0opPi9BLcyLDaxk",
+      authDomain: "sipintar-e8bec.firebaseapp.com",
+      databaseURL: "https://sipintar-e8bec-default-rtdb.firebaseio.com",
+      projectId: "sipintar-e8bec",
+      storageBucket: "sipintar-e8bec.appspot.com",
+      messagingSenderId: "635921588909",
+      appId: "1:635921588909:web:520ca215944be788739c24"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const wrapper = document.getElementById("orderContainer");
+    const searchInput = document.getElementById("searchInput");
+    let resepList = [];
+
+    const resepRef = ref(db, "resep_obat");
+
+    onValue(resepRef, (snapshot) => {
+      wrapper.innerHTML = "";
+      resepList = [];
+
+      if (!snapshot.exists()) {
+        wrapper.innerHTML = `<p style="text-align:center;color:gray;">Belum ada resep masuk.</p>`;
+        return;
+      }
+
+      snapshot.forEach((child) => {
+        resepList.push({ id: child.key, ...child.val() });
+      });
+
+      tampilkanData(resepList);
+    });
+
+    function tampilkanData(dataArray) {
+      wrapper.innerHTML = "";
+
+      dataArray.forEach((d) => {
+        const card = document.createElement("div");
+        card.className = "order-card";
+
+        card.innerHTML = `
+          <div class="order-info">
+            <h4>Nama Pasien: ${d.nama_pasien || "-"}</h4>
+            <p><strong>NIK:</strong> ${d.nik_pasien || "-"}</p>
+            <p><strong>Dokter:</strong> ${d.dokter || "-"}</p>
+            <p><strong>Penyakit:</strong> ${d.jenisPenyakit || "-"}</p>
+            <p><strong>Hasil Konsultasi:</strong> ${d.hasilKonsultasi || "-"}</p>
+          </div>
+          <button class="pesan-btn" onclick="location.href='detail_pesan.html?id=${d.id}'">
+            Pesan
+          </button>
+        `;
+        wrapper.appendChild(card);
+      });
+    }
+
+    searchInput.addEventListener("input", () => {
+      const keyword = searchInput.value.toLowerCase();
+      const hasil = resepList.filter(item =>
+        item.nama_pasien.toLowerCase().includes(keyword) ||
+        item.nik_pasien.toLowerCase().includes(keyword)
+      );
+      tampilkanData(hasil);
+    });
+  </script>
+
+</body>
+</html>

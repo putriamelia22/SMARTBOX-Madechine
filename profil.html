@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profil Apoteker</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+*{
+  box-sizing:border-box;
+  font-family:'Poppins',sans-serif;
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg,#f6cfd5,#f1b7bf);
+}
+
+.container{
+  width:380px;
+  background:#fff;
+  border-radius:24px;
+  padding:28px;
+  text-align:center;
+  box-shadow:0 15px 35px rgba(0,0,0,.15);
+}
+
+.profile-top{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  margin-bottom:18px;
+}
+
+.avatar{
+  width:96px;
+  height:96px;
+  border-radius:50%;
+  background:#f2f2f2;
+  overflow:hidden;
+  box-shadow:0 6px 16px rgba(0,0,0,.2);
+}
+
+.avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.upload-btn{
+  margin-top:10px;
+  background:#9b0f0f;
+  color:#fff;
+  border:none;
+  padding:8px 18px;
+  border-radius:20px;
+  font-size:13px;
+  cursor:pointer;
+  display:none;
+}
+
+.profile-info{
+  text-align:left;
+}
+
+label{
+  font-size:13px;
+  font-weight:600;
+  margin-bottom:6px;
+  display:block;
+}
+
+input{
+  width:100%;
+  padding:12px 14px;
+  border-radius:14px;
+  border:1px solid #ddd;
+  background:#f9f9f9;
+  margin-bottom:16px;
+  font-size:14px;
+}
+
+input:disabled{
+  background:#eee;
+  color:#666;
+}
+
+.button-primary{
+  width:100%;
+  padding:13px;
+  background:#9b0f0f;
+  color:#fff;
+  border:none;
+  border-radius:18px;
+  font-size:15px;
+  cursor:pointer;
+}
+
+.button-secondary{
+  width:100%;
+  padding:13px;
+  background:#eee;
+  border:none;
+  border-radius:18px;
+  margin-top:12px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="profile-top">
+    <div class="avatar">
+      <img id="profileImage"
+        src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+    </div>
+
+    <input type="file" id="uploadPhoto" accept="image/*" hidden>
+
+    <button class="upload-btn" id="uploadBtn"
+      onclick="document.getElementById('uploadPhoto').click()">
+      Ganti Foto Profil
+    </button>
+  </div>
+
+  <h2>Profil Apoteker</h2>
+
+  <div class="profile-info">
+    <label>Username</label>
+    <input type="text" id="username" disabled>
+
+    <label>Password</label>
+    <input type="password" id="password" disabled>
+  </div>
+
+  <button class="button-primary" id="editBtn">Edit Profil</button>
+  <button class="button-primary" id="saveBtn" style="display:none;">
+    Simpan Perubahan
+  </button>
+  <button class="button-secondary" onclick="history.back()">Kembali</button>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+
+/* ================= FIREBASE CONFIG ================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyAaNxT19AnB6Y_V2SwK0opPi9BLcyLDaxk",
+  authDomain: "sipintar-e8bec.firebaseapp.com",
+  databaseURL: "https://sipintar-e8bec-default-rtdb.firebaseio.com",
+  projectId: "sipintar-e8bec",
+  storageBucket: "sipintar-e8bec.appspot.com",
+  messagingSenderId: "635921588909",
+  appId: "1:635921588909:web:6d747902f5651c61739c24"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const storage = getStorage(app);
+
+/* ================= ELEMENT ================= */
+const profileImg = document.getElementById("profileImage");
+const uploadPhoto = document.getElementById("uploadPhoto");
+const uploadBtn = document.getElementById("uploadBtn");
+const usernameInput = document.getElementById("username");
+const passwordInput = document.getElementById("password");
+const editBtn = document.getElementById("editBtn");
+const saveBtn = document.getElementById("saveBtn");
+
+/* ================= SESSION ================= */
+const activeUser = JSON.parse(localStorage.getItem("active_user"));
+if (!activeUser?.username) {
+  alert("Belum login");
+  location.href = "from_login.html";
+}
+
+/* ================= AMBIL USER ================= */
+let userKey = null;
+const snap = await get(ref(db, "apoteker"));
+
+snap.forEach(child => {
+  if (child.val().username === activeUser.username) {
+    userKey = child.key;
+    usernameInput.value = child.val().username;
+    passwordInput.value = child.val().password || "";
+    if (child.val().photoURL) {
+      profileImg.src = child.val().photoURL + "?t=" + Date.now();
+    }
+  }
+});
+
+if (!userKey) {
+  alert("User tidak ditemukan di database");
+  throw new Error("USER NOT FOUND");
+}
+
+const userRef = ref(db, `apoteker/${userKey}`);
+
+/* ================= MODE ================= */
+function setViewMode(){
+  usernameInput.disabled = true;
+  passwordInput.disabled = true;
+  uploadBtn.style.display = "none";
+  editBtn.style.display = "block";
+  saveBtn.style.display = "none";
+}
+
+function setEditMode(){
+  usernameInput.disabled = false;
+  passwordInput.disabled = false;
+  uploadBtn.style.display = "block";
+  editBtn.style.display = "none";
+  saveBtn.style.display = "block";
+}
+
+setViewMode();
+
+/* ================= EDIT ================= */
+editBtn.onclick = () => setEditMode();
+
+/* ================= SIMPAN ================= */
+saveBtn.onclick = async () => {
+  try {
+    await update(userRef, {
+      password: passwordInput.value
+    });
+    alert("Profil benar-benar tersimpan di Firebase");
+    setViewMode();
+  } catch (err) {
+    console.error(err);
+    alert("Gagal menyimpan ke Firebase");
+  }
+};
+
+/* ================= UPLOAD FOTO ================= */
+uploadPhoto.onchange = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  try {
+    profileImg.src = URL.createObjectURL(file);
+
+    const storageRef = sRef(storage, `foto_profil/${userKey}.jpg`);
+    await uploadBytes(storageRef, file);
+
+    const photoURL = await getDownloadURL(storageRef);
+
+    await update(userRef, {
+      photoURL: photoURL
+    });
+
+    alert("Foto profil benar-benar tersimpan di Firebase");
+  } catch (err) {
+    console.error(err);
+    alert("Upload foto GAGAL");
+  }
+};
+</script>
+
+</body>
+</html>

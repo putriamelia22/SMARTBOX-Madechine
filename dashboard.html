@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Smartbox Medicine</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"> 
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: #f5dcdc;
+    }
+
+    /* ================= SIDEBAR ================= */
+    .sidebar {
+      position: fixed;
+      width: 250px;
+      background-color: #f5bcbc;
+      padding: 20px;
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+      z-index: 1000;
+      height: 100%;
+    }
+
+    .sidebar.active { display: flex; }
+
+    .sidebar .close-btn {
+      font-size: 22px;
+      font-weight: bold;
+      cursor: pointer;
+      align-self: flex-end;
+    }
+
+    .username-box {
+      font-size: 18px;
+      font-weight: bold;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: black;
+      font-size: 16px;
+      padding: 8px;
+      border-radius: 6px;
+    }
+
+    .sidebar a:hover {
+      background: #d88c8c;
+      color: white;
+      padding-left: 12px;
+    }
+
+    .logout-btn {
+      margin-top: 20px;
+      background: #850808;
+      color: white;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+    }
+
+    /* ================= TOP BAR ================= */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      padding: 10px 20px;
+      background: #f3b4b4;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .menu-icon {
+      font-size: 30px;
+      cursor: pointer;
+    }
+
+    .search-bar {
+      flex-grow: 1;
+      margin: 0 20px;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 9px 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    .profile-icon {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: black;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      font-size: 22px;
+    }
+
+    /* ================= HEADER ================= */
+    .header-text {
+      text-align: center;
+      font-size: 28px;
+      margin-top: 40px;
+      font-weight: bold;
+    }
+
+    /* ================= MENU ================= */
+    .container {
+      display: flex;
+      justify-content: center;
+      gap: 70px;
+      padding: 60px 20px;
+      flex-wrap: wrap;
+    }
+
+    .box {
+      background: white;
+      border-radius: 14px;
+      padding: 40px 20px;
+      width: 220px;
+      height: 220px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s;
+      position: relative;
+    }
+
+    .box:hover { transform: scale(1.05); }
+
+    .box i {
+      font-size: 110px;
+      margin-bottom: 15px;
+    }
+
+    .label {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .notification {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background: red;
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+
+<body>
+
+  <!-- ================= SIDEBAR ================= -->
+  <div class="sidebar" id="sidebar">
+    <div class="close-btn" onclick="toggleSidebar()">X</div>
+
+    <div class="username-box" id="sbName">
+      <i class="fa fa-user"></i> Haloo kak -
+    </div>
+
+    <a href="dashboard.html"><i class="fa fa-home"></i> Dashboard</a>
+    <a href="cekbox.html"><i class="fa fa-box-open"></i> Cek Box</a>
+    <a href="pesan.html"><i class="fa fa-comment-alt"></i> Pesan</a>
+
+    <button class="logout-btn" id="logoutBtn">Logout</button>
+  </div>
+
+  <!-- ================= TOP BAR ================= -->
+  <div class="top-bar">
+    <div class="menu-icon" onclick="toggleSidebar()">
+      <i class="fas fa-bars"></i>
+    </div>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search menu...">
+    </div>
+
+    <div class="profile-icon" id="profileBtn">
+      <i class="fa fa-user"></i>
+    </div>
+  </div>
+
+  <!-- ================= HEADER ================= -->
+  <div class="header-text">
+    Selamat Datang Di <br> Smartbox Medicine
+  </div>
+
+  <!-- ================= MENU ================= -->
+  <div class="container">
+
+    <div class="box menu" data-name="cek box" onclick="location.href='cekbox.html'">
+      <i class="fas fa-box-open"></i>
+      <div class="label">Cek Box</div>
+    </div>
+
+    <div class="box menu" data-name="pesan" onclick="location.href='pesan.html'">
+      <i class="fas fa-comment-alt"></i>
+      <div class="label">Pesan</div>
+      <div class="notification" id="notifCount">0</div>
+    </div>
+
+  </div>
+
+  <!-- ================= FIREBASE ================= -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAaNxT19AnB6Y_V2SwK0opPi9BLcyLDaxk",
+      authDomain: "sipintar-e8bec.firebaseapp.com",
+      databaseURL: "https://sipintar-e8bec-default-rtdb.firebaseio.com",
+      projectId: "sipintar-e8bec",
+      storageBucket: "sipintar-e8bec.appspot.com",
+      messagingSenderId: "635921588909",
+      appId: "1:635921588909:web:520ca215944be788739c24"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const notifEl = document.getElementById("notifCount");
+    const resepRef = ref(db, "resep_obat");
+
+    onValue(resepRef, (snapshot) => {
+      let count = 0;
+      snapshot.forEach(child => {
+        if (child.val().status === "baru") count++;
+      });
+      notifEl.textContent = count;
+    });
+  </script>
+
+  <!-- ================= SCRIPT ================= -->
+  <script>
+    // Search
+    const searchInput = document.getElementById("searchInput");
+    const menus = document.querySelectorAll(".menu");
+
+    searchInput.addEventListener("input", () => {
+      const keyword = searchInput.value.toLowerCase();
+      menus.forEach(menu => {
+        menu.classList.toggle(
+          "hidden",
+          !menu.dataset.name.toLowerCase().includes(keyword)
+        );
+      });
+    });
+
+    // Sidebar
+    function toggleSidebar() {
+      document.getElementById("sidebar").classList.toggle("active");
+    }
+
+    // ================= USERNAME (FIX FINAL) =================
+    const activeUser = JSON.parse(localStorage.getItem("active_user"));
+
+    const username = activeUser?.username || "-";
+
+    document.getElementById("sbName").innerHTML =
+      `<i class="fa fa-user"></i> Haloo kak ${username}`;
+
+    // Logout
+    document.getElementById("logoutBtn").onclick = () => {
+      localStorage.removeItem("active_user");
+      location.href = "from_login.html";
+    };
+
+    // Profil redirect
+    document.getElementById("profileBtn").onclick = () => {
+      location.href = "profil.html";
+    };
+  </script>
+
+</body>
+</html>

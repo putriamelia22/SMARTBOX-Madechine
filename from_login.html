@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login Apoteker</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+*{
+  box-sizing:border-box;
+  font-family:'Poppins',sans-serif;
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+  background:url('dokter.jpg') center/cover no-repeat fixed;
+}
+
+/* OVERLAY */
+.wrapper{
+  min-height:100vh;
+  background:rgba(0,0,0,.45);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+/* ================= WELCOME ================= */
+.welcome-screen{
+  text-align:center;
+  color:white;
+  max-width:360px;
+}
+
+.welcome-screen h1{
+  font-size:36px;
+  letter-spacing:2px;
+  margin-bottom:10px;
+}
+
+.welcome-screen p{
+  font-size:15px;
+  margin-bottom:24px;
+}
+
+.welcome-screen button{
+  padding:12px 28px;
+  border:none;
+  border-radius:14px;
+  background:#b30000;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+}
+
+/* ================= LOGIN CARD ================= */
+.login-container{
+  width:100%;
+  max-width:900px;
+  background:#f3e4e8;
+  border-radius:20px;
+  display:none;
+  overflow:hidden;
+  box-shadow:0 18px 40px rgba(0,0,0,.5);
+}
+
+/* LEFT IMAGE (DESKTOP) */
+.left-image{
+  width:50%;
+  background:#f7d6dc;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px 0;
+}
+
+/* 🔥 GAMBAR DIBESARKAN */
+.left-image img{
+  width:100%;
+}
+
+/* RIGHT FORM */
+.right-form{
+  width:70%;
+  padding:42px 38px;
+}
+
+.right-form h2{
+  text-align:center;
+  margin-bottom:24px;
+}
+
+label{
+  display:block;
+  margin-top:14px;
+  font-size:14px;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  margin-top:6px;
+  border-radius:12px;
+  border:none;
+  background:#ddd;
+}
+
+.btn{
+  width:100%;
+  margin-top:28px;
+  padding:14px;
+  border-radius:14px;
+  border:none;
+  background:#b30000;
+  color:white;
+  font-size:16px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+/* ================= MOBILE PORTRAIT ================= */
+@media(max-width:768px){
+
+  .login-container{
+    flex-direction:column;
+    max-width:340px;
+    border-radius:24px;
+  }
+
+  .left-image{
+    width:100%;
+    padding:26px 0;
+  }
+
+  /* 🔥 GAMBAR HP LEBIH BESAR */
+  .left-image img{
+    width:80%;
+  }
+
+  .right-form{
+    width:100%;
+    padding:26px 22px 30px;
+  }
+
+  .right-form h2{
+    font-size:20px;
+  }
+
+  input{
+    font-size:14px;
+    padding:11px;
+  }
+
+  .btn{
+    font-size:15px;
+    padding:13px;
+  }
+
+  .welcome-screen h1{
+    font-size:30px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+
+  <!-- WELCOME -->
+  <div class="welcome-screen" id="welcome">
+    <h1>SELAMAT DATANG</h1>
+    <p>Sistem pengambilan obat otomatis tanpa antrian</p>
+    <button onclick="showLogin()">Masuk ke Login</button>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="login-container" id="loginBox">
+    <div class="left-image">
+      <img src="obat.jpg" alt="ilustrasi obat">
+    </div>
+
+    <div class="right-form">
+      <h2>LOGIN APOTEKER</h2>
+
+      <label>Username</label>
+      <input id="user" type="text" placeholder="Masukkan Username">
+
+      <label>Password</label>
+      <input id="pass" type="password" placeholder="Masukkan Password">
+
+      <button class="btn" onclick="login()">Masuk</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getDatabase } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAaNxT19AnB6Y_V2SwK0opPi9BLcyLDaxk",
+  authDomain: "sipintar-e8bec.firebaseapp.com",
+  databaseURL: "https://sipintar-e8bec-default-rtdb.firebaseio.com",
+  projectId: "sipintar-e8bec",
+  storageBucket: "sipintar-e8bec.appspot.com",
+  messagingSenderId: "635921588909",
+  appId: "1:635921588909:web:520ca215944be788739c24"
+};
+
+const app = initializeApp(firebaseConfig);
+window.db = getDatabase(app);
+</script>
+
+<script type="module">
+import { ref, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+window.login = async function(){
+  const u=document.getElementById("user").value.trim().toLowerCase();
+  const p=document.getElementById("pass").value.trim();
+
+  if(!u||!p) return alert("Isi username dan password");
+
+  const snap=await get(ref(window.db,"apoteker"));
+  let found=null;
+
+  snap.forEach(c=>{
+    const d=c.val();
+    if(d.username?.toLowerCase()===u) found=d;
+  });
+
+  if(!found) return alert("Akun tidak ditemukan");
+  if(String(found.password)!==String(p)) return alert("Password salah");
+
+  localStorage.setItem("active_user",JSON.stringify(found));
+  location.href="dashboard.html";
+}
+</script>
+
+<script>
+function showLogin(){
+  document.getElementById("welcome").style.display="none";
+  document.getElementById("loginBox").style.display="flex";
+}
+</script>
+
+</body>
+</html>

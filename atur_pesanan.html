@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Atur Pesanan Obat - Smartbox Medicine</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background-color: #f4cccc;
+}
+.sidebar {
+  position: fixed;
+  width: 250px;
+  background-color: #f5bcbc;
+  padding: 20px;
+  display: none;
+  flex-direction: column;
+  gap: 20px;
+  z-index: 3000;
+  height: 100%;
+}
+.sidebar.active { display: flex; }
+.close-btn { font-size: 22px; font-weight: bold; cursor: pointer; align-self: flex-end; }
+.username-box { font-size: 18px; font-weight: bold; display: flex; gap: 8px; }
+.sidebar a {
+  text-decoration:none;
+  color:black;
+  display:flex;
+  gap:10px;
+  padding:6px;
+}
+.sidebar a:hover {
+  background:#d88c8c;
+  color:white;
+  border-radius:6px;
+}
+.logout-btn {
+  background:#850808;
+  color:white;
+  padding:10px;
+  border:none;
+  border-radius:6px;
+}
+.top-bar {
+  display:flex;
+  align-items:center;
+  padding:10px 20px;
+  background:#f3b4b4;
+}
+.menu-icon { font-size:30px; cursor:pointer; }
+.search-bar { flex:1; margin:0 20px; }
+.search-bar input {
+  width:100%;
+  padding:9px;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+.profile-icon {
+  width:45px;
+  height:45px;
+  border-radius:50%;
+  background:black;
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.container {
+  background:white;
+  width:95%;
+  max-width:1000px;
+  margin:20px auto;
+  padding:20px 30px;
+  border-radius:10px;
+  border:4px solid #e3b1b1;
+}
+.nama-box {
+  background:#f3f3f3;
+  padding:12px;
+  border-radius:8px;
+  text-align:center;
+  font-weight:bold;
+  margin-bottom:15px;
+}
+.row-obat {
+  padding:10px 0;
+  border-bottom:1px solid #eee;
+}
+.jadwal-box { display:flex; gap:10px; }
+.jadwal-input {
+  width:55px;
+  height:50px;
+  text-align:center;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+.btn-pesan {
+  background:red;
+  color:white;
+  padding:12px 35px;
+  border:none;
+  border-radius:8px;
+  display:block;
+  margin:25px auto 0;
+  font-weight:bold;
+}
+.popup {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.3);
+  justify-content:center;
+  align-items:center;
+  z-index:4000;
+}
+.popup-content {
+  width:330px;
+  background:white;
+  padding:20px;
+  border-radius:15px;
+  position:relative;
+}
+.popup-close {
+  position:absolute;
+  top:10px;
+  right:15px;
+  font-size:22px;
+  cursor:pointer;
+}
+.popup-card {
+  background:#f7f7f7;
+  padding:12px;
+  border-radius:10px;
+  margin-bottom:12px;
+}
+.btn-select {
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #bbb;
+  background:#eee;
+  margin-bottom:10px;
+}
+.box-options {
+  display:none;
+  flex-direction:column;
+  gap:8px;
+  margin-bottom:10px;
+}
+.box-options button {
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #aaa;
+  background:white;
+}
+.btn-ok {
+  width:100%;
+  background:#4cd137;
+  color:white;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar" id="sidebar">
+  <div class="close-btn" onclick="toggleSidebar()">X</div>
+  <div class="username-box" id="sbName">
+    <i class="fa fa-user"></i> Haloo kak
+  </div>
+  <a href="dashboard.html"><i class="fa fa-home"></i> Dashboard</a>
+  <a href="cekbox.html"><i class="fa fa-box-open"></i> Cek Box</a>
+  <a href="pesan.html"><i class="fa fa-comment-alt"></i> Pesan</a>
+  <button class="logout-btn" id="logoutBtn">Logout</button>
+</div>
+
+<div class="top-bar">
+  <div class="menu-icon" onclick="toggleSidebar()">
+    <i class="fas fa-bars"></i>
+  </div>
+  <div class="search-bar">
+    <input placeholder="Search...">
+  </div>
+  <div class="profile-icon">
+    <i class="fa fa-user"></i>
+  </div>
+</div>
+
+<div class="container">
+  <div class="nama-box" id="namaPasien">Memuat nama...</div>
+  <div class="nama-box" id="nikBox">NIK: -</div>
+  <div id="obatList"></div>
+
+  <b>Jadwal Pengambilan</b>
+  <div class="jadwal-box">
+    <input class="jadwal-input" id="j1">
+    <input class="jadwal-input" id="j2">
+    <input class="jadwal-input" id="j3">
+    <input class="jadwal-input" id="j4">
+  </div>
+
+  <button class="btn-pesan" onclick="showPopup()">Pesan</button>
+</div>
+
+<div class="popup" id="popup">
+  <div class="popup-content">
+    <span class="popup-close" onclick="closePopup()">X</span>
+
+    <div class="popup-card">
+      <div><b>Nama:</b> <span id="popupNama"></span></div>
+      <div><b>NIK:</b> <span id="popupNik"></span></div>
+      <div><b>Jadwal:</b> <span id="popupJadwal"></span></div>
+    </div>
+
+    <button class="btn-select" id="btnBox" onclick="toggleBox()">Pilih Box Penyimpanan</button>
+
+    <div class="box-options" id="boxSelect">
+      <button onclick="selectBox('Box 1')">Box 1</button>
+      <button onclick="selectBox('Box 2')">Box 2</button>
+    </div>
+
+    <button class="btn-ok" onclick="saveOrder()">OK</button>
+  </div>
+</div>
+
+<script>
+function toggleSidebar() {
+  document.getElementById("sidebar").classList.toggle("active");
+}
+const user = JSON.parse(localStorage.getItem("active_user"));
+sbName.innerHTML = `<i class="fa fa-user"></i> Haloo kak ${user?.username || "-"}`;
+logoutBtn.onclick = () => {
+  localStorage.removeItem("active_user");
+  location.href = "from_login.html";
+};
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getDatabase, ref, get, set, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyAaNxT19AnB6Y_V2SwK0opPi9BLcyLDaxk",
+  databaseURL: "https://sipintar-e8bec-default-rtdb.firebaseio.com"
+});
+const db = getDatabase(app);
+
+const id = new URLSearchParams(location.search).get("id");
+let obatData=[], nikPasien="", selectedBox="", dataReady=false;
+
+// 🔹 AMBIL DATA RESEP
+get(ref(db,"resep_obat/"+id)).then(snap=>{
+  if(!snap.exists()){
+    alert("Pesanan sudah diproses");
+    location.href="dashboard.html";
+    return;
+  }
+  const d=snap.val();
+  dataReady=true;
+  nikPasien=d.nik_pasien;
+  namaPasien.textContent=d.nama_pasien;
+  nikBox.textContent="NIK: "+nikPasien;
+  obatData=d.resep.split(",").map(x=>x.trim());
+  obatList.innerHTML=obatData.map(o=>`<div class="row-obat">${o}</div>`).join("");
+});
+
+// 🔹 DEFAULT JAM
+const n=new Date(); n.setMinutes(n.getMinutes()+15);
+const h=n.getHours().toString().padStart(2,"0");
+const m=n.getMinutes().toString().padStart(2,"0");
+j1.value=h[0]; j2.value=h[1]; j3.value=m[0]; j4.value=m[1];
+
+window.showPopup=()=>{
+  if(!dataReady) return alert("Data belum siap");
+  popupNama.textContent=namaPasien.textContent;
+  popupNik.textContent=nikPasien;
+  popupJadwal.textContent=`${j1.value}${j2.value}:${j3.value}${j4.value}`;
+  popup.style.display="flex";
+};
+window.closePopup=()=>popup.style.display="none";
+window.toggleBox=()=>boxSelect.style.display=boxSelect.style.display==="flex"?"none":"flex";
+window.selectBox=b=>{
+  selectedBox=b;
+  btnBox.textContent="Penyimpanan: "+b;
+  boxSelect.style.display="none";
+};
+
+// 🔥 SIMPAN + HAPUS RESEP
+window.saveOrder=()=>{
+  if(!selectedBox) return alert("Pilih box dulu");
+
+  const otp=Math.floor(100000+Math.random()*900000);
+  const boxKey = selectedBox==="Box 1" ? "box1" : "box2";
+
+  set(ref(db,`pasien/${nikPasien}/pesanan_obat/${id}`),{
+    nama_pasien:namaPasien.textContent,
+    nik_pasien:nikPasien,
+    jadwal:`${j1.value}${j2.value}:${j3.value}${j4.value}`,
+    box:selectedBox,
+    daftar_obat:obatData,
+    otp,
+    status:"menunggu"
+  }).then(()=>{
+    return update(ref(db,boxKey),{
+      otp,
+      otp_used:false,
+      otp_time:serverTimestamp(),
+      status:0
+    });
+  }).then(()=>{
+    return set(ref(db,`resep_obat/${id}`),null);
+  }).then(()=>{
+    alert("Pesanan berhasil diproses.\nOTP: "+otp);
+    location.href="dashboard.html";
+  }).catch(err=>{
+    alert("Gagal menyimpan pesanan");
+    console.error(err);
+  });
+};
+</script>
+
+</body>
+</html>
